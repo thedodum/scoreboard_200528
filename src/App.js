@@ -1,26 +1,43 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
+import Header from "./components/Header";
+import Player from "./components/Player";
+import AddPlayerForm from "./components/AddPlayerForm";
+import {useSelector} from "react-redux";
+import {CustomPlayer} from "./components/CustomPlayer";
+import {SearchBar} from "./components/SearchBar";
 
-function App() {
+function App(){
+    let players = useSelector(state => state.playerReducer.players);
+
+    const keyword = useSelector(state => state.playerReducer.keyword);
+
+    if (keyword) {
+        players = players.filter(item => item.name.indexOf(keyword) >= 0);
+    }
+
+  const getHighScore = () => {
+      const highScore = players.reduce((maxScore, player) => maxScore > player.score ? maxScore : player.score, 0);
+      return highScore > 0 ? highScore : null;
+  }
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
-}
+      <div className="scoreboard">
+        <Header players={players} />
+        <SearchBar></SearchBar>
+        {players.map((item, index) =>
+            <CustomPlayer name={item.name}
+                    score={item.score}
+                    key={item.id.toString()}
+                    index={index}
+                    id={item.id}
+                    isHighScore={item.score === getHighScore()}/>)
+        }
+        <AddPlayerForm />
+      </div>
+
+  )
+};
+
 
 export default App;
